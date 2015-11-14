@@ -3,7 +3,10 @@ import webbrowser
 import tempfile
 import urllib.request
 from tkinter import *
-
+#wget http://c758482.r82.cf2.rackcdn.com/Sublime\ Text\ 2.0.2\ x64.tar.bz2
+#tar vxjf Sublime\ Text\ 2.0.2\ x64.tar.bz2
+#sudo mv Sublime\ Text\ 2 /opt/
+#sudo ln -s /opt/Sublime\ Text\ 2/sublime_text /usr/bin/sublime
 
 class Browser:
     """This creates a relay that allows a user to directly view data sent from a web server."""
