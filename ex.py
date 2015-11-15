@@ -19,7 +19,7 @@ class Browser(QtGui.QMainWindow):
         """
 
         QtGui.QMainWindow.__init__(self)
-        self.resize(800,600)
+        self.resize(1600,600)
         self.centralwidget = QtGui.QWidget(self)
 
         self.mainLayout = QtGui.QHBoxLayout(self.centralwidget)
