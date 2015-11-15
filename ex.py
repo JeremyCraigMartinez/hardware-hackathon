@@ -70,7 +70,7 @@ class Browser(QtGui.QMainWindow):
 if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
-		QtWebKit.QWebSettings.globalSettings().setAttributes(QWebSettings, PluginsEnabled, True)
+    QtWebKit.QWebSettings.globalSettings().setAttributes(QWebSettings, PluginsEnabled, True)
     main = Browser()
     main.show()
     sys.exit(app.exec_())
