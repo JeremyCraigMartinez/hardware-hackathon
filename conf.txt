@@ -1,0 +1,187 @@
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install libfontconfig1-dev libdbus-1-dev libfreetype6-dev libudev-dev libicu-dev libsqlite3-dev
+libxslt1-dev libssl-dev libasound2-dev libavcodec-dev libavformat-dev libswscale-dev libgstreamer0.10-dev
+libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-plugins-good gstreamer0.10-plugins-bad
+libraspberrypi-dev libpulse-dev libx11-dev libglib2.0-dev libcups2-dev freetds-dev libsqlite0-dev libpq-dev
+libiodbc2-dev libmysqlclient-dev firebird-dev libpng12-dev libjpeg62-dev libgst-dev libxext-dev libxcb1 libxcb1-dev
+libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0
+libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync0 libxcb-sync0-dev libxcb-render-util0
+libxcb-render-util0-dev libxcb-xfixes0-dev libxrender-dev libxcb-shape0-dev libxcb-randr0-dev libxcb-glx0-dev
+libxi-dev libdrm-dev
+Then make your build directory:
+mkdir ~/opt
+cd ~/opt
+Retrieve qt5 source code from git:
+git clone git://code.qt.io/qt/qt5.git
+Retrieve git sources for other components
+cd qt5
+./init-repository
+Do not apply any patches that are available out there. They are no longer necessary with the latest Qt5. The git source should compile with a few tricks in the configure parameters without any patches.
+First make sure you are in the qt5 directory.
+cd ~/opt/qt5
+In order to get the configure script to build all of the Makefiles correctly you will need to tweak your ~/opt/qt5/qtbase/configure script. Use your favorite text editor (vim, nano, emacs) and change/add the following code in the ~/opt/qt5/qtbase/configure script (search for QT_CFLAGS_DBUS):
+# flags for raspberry pi build
+# flags for libdbus-1
+QT_CFLAGS_DBUS="-I/usr/include/dbus-1.0/ -I/usr/lib/arm-linux-gnueabihf/dbus-1.0/include/"
+QT_LIBS_DBUS=-ldbus-1
+ 
+# flags for Glib (X11 only)
+QT_CFLAGS_GLIB="-I/usr/include/glib-2.0/ -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include/"
+QT_LIBS_GLIB=-lglib-2.0
+ 
+QT_CFLAGS_PULSEAUDIO="-I/usr/include/glib-2.0/ -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include/"
+QT_LIBS_PULSEAUDIO="-lpulse -lpulse-mainloop-glib"
+ 
+# flags for GStreamer (X11 only)
+QT_CFLAGS_GSTREAMER="-I/usr/include/gstreamer-0.10/ -I/usr/include/glib-2.0/ -I/usr/lib/arm-linux-
+gnueabihf/glib-2.0/include/ -I/usr/include/libxml2/"
+QT_LIBS_GSTREAMER=
+Then before closing the file search for QT_CFLAGS_FONTCONFIG in the configure script. It should be below the above entries, you need to change the one in the else statement to this:
+QT_CFLAGS_FONTCONFIG=-I/usr/include/freetype2/
+If the above changes are hard to follow then you can use the following patch file:
+1030,1031c1030,1031
+< QT_CFLAGS_DBUS=
+< QT_LIBS_DBUS=
+—
+> QT_CFLAGS_DBUS="-I/usr/include/dbus-1.0/ -I/usr/lib/arm-linux-gnueabihf/dbus-1.0/include/"
+> QT_LIBS_DBUS=-ldbus-1
+1034,1035c1034,1038
+< QT_CFLAGS_GLIB=
+< QT_LIBS_GLIB=
+—
+> QT_CFLAGS_GLIB="-I/usr/include/glib-2.0/ -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include/"
+> QT_LIBS_GLIB=-lglib-2.0
+>
+> QT_CFLAGS_PULSEAUDIO="-I/usr/include/glib-2.0/ -I/usr/lib/arm-linux-gnueabihf/glib-2.0/include/"
+> QT_LIBS_PULSEAUDIO="-lpulse -lpulse-mainloop-glib"
+1038c1041
+< QT_CFLAGS_GSTREAMER=
+—
+> QT_CFLAGS_GSTREAMER="-I/usr/include/gstreamer-0.10/ -I/usr/include/glib-2.0/ -I/usr/lib/arm-linux-
+gnueabihf/glib-2.0/include/ -I/usr/include/libxml2/"
+5123c5126
+< QT_CFLAGS_FONTCONFIG=
+—
+> QT_CFLAGS_FONTCONFIG=-I/usr/include/freetype2/
+In order to properly run configure for Qt5 on the Raspberry Pi, you need to point the CROSS_COMPILE variable to the native compiler located at /usr/bin/g+. The CROSS_COMPILE parameter is the path to the compiler (without the g). If you do not do this properly it will complain that it is not being cross compiled.
+All output is stored in the file called ‘output’ in case something goes wrong. At the end of the output file it should say you can run ‘make’, if not look for errors at the end of the output.
+Do not be concerned with some things not building due to missing packages, there will be errors for those. If it does not mention that you can run make then check the last error, it is generally the show-stopper. Run configure:
+./configure -v -opengl es2 -device linux-rasp-pi-g''+ -device-option CROSS_COMPILE=/usr/bin/ -opensource
+-confirm-license -optimized-qmake -reduce-exports -release -qt-pcre -make libs -prefix /usr/local/qt5 &> output
+Check the output file to see that it is building the components you need (towards the end of the output it will have Yes next to the Qt Components that will be built) and it should say that you can now run 'make'.
+Example from 'output' file:
+…
+Build options:
+ Configuration ………. accessibility accessibility-atspi-bridge alsa audio-backend c+''11 clock-gettime
+clock-monotonic concurrent cross_compile cups dbus egl eglfs evdev eventfd fontconfig full-config getaddrinfo
+getifaddrs glib gstreamer iconv icu inotify ipv6ifname large-config largefile libudev linuxfb medium-config
+minimal-config mremap neon nis no-pkg-config opengl opengles2 openssl pcre png precompile_header pulseaudio
+qpa qpa reduce_exports reduce_relocations release rpath shared small-config system-freetype system-jpeg
+system-png system-zlib v8 v8snapshot xcb xcb-glx xcb-render xcb-xlib xinput2 xkbcommon-qt xlib xrender
+ Build parts ………… libs
+ Mode ………………. release
+ Using C''+11 ………… yes
+ Using PCH ………….. yes
+ Target compiler supports:
+ iWMMXt/Neon ………. no/yes
+ 
+Qt modules and options:
+ Qt D-Bus …………… yes (loading dbus-1 at runtime)
+ Qt Concurrent ………. yes
+ Qt GUI …………….. yes
+ Qt Widgets …………. yes
+ JavaScriptCore JIT ….. yes (To be decided by JavaScriptCore)
+ QML debugging ………. yes
+ Use system proxies ….. no
+ 
+Support enabled for:
+ Accessibility ………. yes
+ ALSA ………………. yes
+ CUPS ………………. yes
+ FontConfig …………. yes
+ Iconv ……………… yes
+ ICU ……………….. yes
+ Image formats:
+ GIF ……………… yes (plugin, using system library)
+ JPEG …………….. yes (plugin, using system library)
+ PNG ……………… yes (in QtGui, using system library)
+ Glib ………………. yes
+ GStreamer ………….. yes
+ GTK theme ………….. no
+ Large File …………. yes
+ libudev ……………. yes
+ Networking:
+ getaddrinfo ………. yes
+ getifaddrs ……….. yes
+ IPv6 ifname ………. yes
+ OpenSSL ………….. yes (loading libraries at run-time)
+ NIS ……………….. yes
+ OpenGL …………….. yes (OpenGL ES 2.x)
+ OpenVG …………….. no
+ PCRE ………………. yes (bundled copy)
+ pkg-config …………. no
+ PulseAudio …………. yes
+ QPA backends:
+ DirectFB …………. no
+ EGLFS ……………. yes
+ KMS ……………… no
+ LinuxFB ………….. yes
+ XCB ……………… yes (system library)
+ MIT-SHM ………… yes
+ Xcursor ………… yes (loaded at runtime)
+ Xfixes …………. yes (loaded at runtime)
+ Xi …………….. no
+ Xi2 ……………. yes
+ Xinerama ……….. yes (loaded at runtime)
+ Xrandr …………. yes (loaded at runtime)
+ Xrender ………… yes
+ XKB ……………. no
+ XShape …………. yes
+ XSync ………….. yes
+ XVideo …………. yes
+ Session management ….. yes
+ SQL drivers:
+ DB2 ……………… no
+ InterBase ………… no
+ MySQL ……………. yes (plugin)
+ OCI ……………… no
+ ODBC …………….. yes (plugin)
+ PostgreSQL ……….. yes (plugin)
+ SQLite 2 …………. yes (plugin)
+ SQLite …………… yes (plugin, using bundled copy)
+ TDS ……………… yes (plugin)
+ udev ………………. yes
+ xkbcommon ………….. yes (bundled copy)
+ zlib ………………. yes (system library)
+ 
+NOTE: libxkbcommon 0.2.0 (or higher) not found on the system, will use
+the bundled version from 3rd party directory.
+ 
+Qt is now configured for building. Just run 'make'.
+Once everything is built, you must run 'make install'.
+Qt will be installed into /usr/local/qt5
+ 
+Prior to reconfiguration, make sure you remove any leftovers from
+the previous build.
+Note, the compilation will take about two days to compile overclocked at 900 MHz. If you are logged in remotely consider using byobu or screen so that you can detach your session.
+Then you need to run make as follows (check for errors in the output_make file):
+make &> output_make
+If that is good then run make install (check for errors in the output_make_install file):
+sudo make install &> output_make_install
+After this you need to add some lines to your .bashrc file:
+export LD_LIBRARY_PATH=/usr/local/qt5/lib/
+export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games:/usr/local/qt5/bin
+You need to source your .bashrc file to set-up the above environment variables:
+source ~/.bashrc
+Then run this and check that it points to /usr/local/qt5/bin/qmake
+which qmake
+Example output:
+pi@raspberrypi ~/opt/qt5 $ which qmake
+/usr/local/qt5/bin/qmake
+After this you should be able to compile the sample applications and run them. Try the OpenGL Cube (I have not tested this in X windows, only from the console):
+cp -r~/opt/qt5/qtbase/examples/opengl/cube ~/
+cd~/cube
+qmake
+make
+./cube
