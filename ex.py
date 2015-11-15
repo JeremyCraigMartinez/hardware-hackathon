@@ -37,7 +37,9 @@ class Browser(QtGui.QMainWindow):
         self.bt_back = QtGui.QPushButton(self.frame)
         self.bt_ahead = QtGui.QPushButton(self.frame)
 
-        self.bt_back.setIcon(QtGui.QIcon().fromTheme("go-previous       self.bt_ahead.setIcon(QtGui.QIcon().fromTheme("go-next        self.horizontalLayout.addWidget(self.bt_back)
+        self.bt_back.setIcon(QtGui.QIcon().fromTheme("go-previous")
+        self.bt_ahead.setIcon(QtGui.QIcon().fromTheme("go-next")
+        self.horizontalLayout.addWidget(self.bt_back)
         self.horizontalLayout.addWidget(self.bt_ahead)
         self.horizontalLayout.addWidget(self.tb_url)
         self.gridLayout.addLayout(self.horizontalLayout)
