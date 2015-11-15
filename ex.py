@@ -44,6 +44,9 @@ class Browser(QtGui.QMainWindow):
         self.horizontalLayout.addWidget(self.tb_url)
         self.gridLayout.addLayout(self.horizontalLayout)
 
+        self.page = QtWebKit
+        self.page.QWebSettings.globalSettings().setAttribute(QtWebKit.QWebSettings.PluginsEnabled,True)
+        self.html = self.page.QWebView()
         self.html = QtWebKit.QWebView()
         self.gridLayout.addWidget(self.html)
         self.mainLayout.addWidget(self.frame)
@@ -53,9 +56,16 @@ class Browser(QtGui.QMainWindow):
         self.connect(self.bt_back, QtCore.SIGNAL("clicked()"), self.html.back)
         self.connect(self.bt_ahead, QtCore.SIGNAL("clicked()"), self.html.forward)
 
-        self.default_url = "https://codescience.wordpress.com/"
+        self.default_url = "http://youtube.com"
         self.tb_url.setText(self.default_url)
         self.browse()
+
+        #self.view = QtWebKit.QWebSettings
+        #self.view.globalSettings.setAttribute(QtWebKit.QWebSettings.PluginsEnabled,True)
+        #Settings = self.ui.webView.settings()
+        #QWebSettings.setAttribute(QWebSettings.PluginsEnabled,True)
+        #QtWebKit.QWebSettings.setAttribute(QtWebKit.QWebSettings.PluginsEnabled, True)
+
 
     def browse(self):
         """
@@ -70,7 +80,6 @@ class Browser(QtGui.QMainWindow):
 if __name__ == "__main__":
 
     app = QtGui.QApplication(sys.argv)
-    QtWebKit.QWebSettings.globalSettings().setAttributes(QWebSettings, PluginsEnabled, True)
     main = Browser()
     main.show()
     sys.exit(app.exec_())
