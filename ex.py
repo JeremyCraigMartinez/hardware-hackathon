@@ -6,6 +6,7 @@
     author: Juan Manuel Garcia <jmg.utn@gmail.com>
 
     *******************************************************************
+    http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.5.1/PyQt-gpl-5.5.1.tar.gz
 """
 
 import sys
