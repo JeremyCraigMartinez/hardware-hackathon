@@ -1,0 +1,8 @@
+#!/bin/bash
+
+#https://tabs.ultimate-guitar.com/l/loggins_messina/your_mama_dont_dance_ver2_crd.htm
+nohup python3 ex.py $1 > /dev/null &
+
+# pause and wait for user to begin song
+read -p "Press [Enter] key to start song..."
+mpg123 Loggins\ and\ Messina-\ Your\ Mama\ don\'t\ dance..mp3
